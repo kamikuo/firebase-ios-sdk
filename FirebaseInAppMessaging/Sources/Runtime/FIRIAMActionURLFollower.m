@@ -171,6 +171,22 @@ NS_EXTENSION_UNAVAILABLE("Firebase In App Messaging is not supported for iOS ext
 // @return YES if that delegate method is defined and seeing a YES being returned from
 // trigging it
 - (BOOL)followURLWithContinueUserActivity:(NSURL *)url {
+  NSArray<UIScene *> *connectedScenes = UIApplication.sharedApplication.connectedScenes.allObjects;
+  for (UIScene *scene in connectedScenes) {
+    if ([scene isKindOfClass:[UIWindowScene class]]) {
+      UIWindowScene *windowScene = scene;
+      for (UIWindow *window in windowScene.windows) {
+        if (window.isKeyWindow) {
+          NSUserActivity *userActivity =
+          [[NSUserActivity alloc] initWithActivityType:NSUserActivityTypeBrowsingWeb];
+          userActivity.webpageURL = url;
+          [windowScene.delegate scene:scene continueUserActivity:userActivity];
+          return YES;
+        }
+      }
+    }
+  }
+
   if (self.isContinueUserActivityMethodDefined) {
     FIRLogDebug(kFIRLoggerInAppMessaging, @"I-IAM240004",
                 @"App delegate responds to application:continueUserActivity:restorationHandler:."
